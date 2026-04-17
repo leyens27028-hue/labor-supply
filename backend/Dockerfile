@@ -7,8 +7,12 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Copy prisma schema and generate client
+# Copy prisma schema and scripts
 COPY prisma ./prisma
+COPY scripts ./scripts
+
+# Switch to PostgreSQL and generate client
+RUN node scripts/prepare-deploy.js
 RUN npx prisma generate
 
 # ---- Production Stage ----
@@ -26,14 +30,15 @@ RUN npm ci --production
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 
-# Copy prisma schema (needed at runtime for migrations)
-COPY prisma ./prisma
+# Copy prisma schema (needed at runtime for db push)
+COPY --from=build /app/prisma ./prisma
 
-# Copy application source
+# Copy scripts and application source
+COPY scripts ./scripts
 COPY src ./src
 
 # Expose port
 EXPOSE 5000
 
-# Start the server
-CMD ["node", "src/server.js"]
+# Push schema to DB then start server
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node src/server.js"]
