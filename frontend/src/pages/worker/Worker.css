@@ -1,0 +1,11 @@
+.worker-page .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+.worker-page .page-header h2 { display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem; color: #1e293b; }
+.worker-detail h2 { font-size: 1.3rem; color: #1e293b; margin-bottom: 1.25rem; }
+
+.worker-page .td-actions { display: flex; gap: 0.2rem; }
+.worker-page .btn-sm { background: none; border: none; cursor: pointer; padding: 0.25rem; border-radius: 4px; font-size: 1.15rem; transition: all 0.2s; }
+.worker-page .btn-view { color: #64748b; } .worker-page .btn-view:hover { background: #e2e8f0; color: #1a73e8; }
+.worker-page .btn-edit { color: #1a73e8; } .worker-page .btn-edit:hover { background: #e8f0fe; }
+.worker-page .btn-toggle { color: #10b981; } .worker-page .btn-toggle:hover { background: #d1fae5; }
+.worker-page .btn-delete { color: #ef4444; } .worker-page .btn-delete:hover { background: #fee2e2; }
+.worker-page .row-inactive { opacity: 0.5; }

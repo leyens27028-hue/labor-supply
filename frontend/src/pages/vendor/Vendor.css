@@ -1,0 +1,220 @@
+/* ===== Vendor Grid (Card layout) ===== */
+.vendor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1rem;
+}
+
+.vendor-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.vendor-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+.vendor-card.inactive { opacity: 0.6; }
+
+.vendor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem 0;
+}
+
+.vendor-card-header h3 {
+  font-size: 1.05rem;
+  color: #1e293b;
+}
+
+.badge-inactive {
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.vendor-card-body {
+  padding: 0.75rem 1.25rem;
+}
+
+.vendor-card-body p {
+  text-align: left;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.3rem;
+}
+
+.factory-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.5rem 0;
+}
+
+.factory-tag {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.factory-tag.seasonal { background: #fef3c7; color: #b45309; }
+.factory-tag.permanent { background: #dbeafe; color: #1d4ed8; }
+
+.no-factory { font-size: 0.8rem; color: #999; font-style: italic; }
+
+.order-count {
+  font-size: 0.8rem;
+  color: #1a73e8;
+  font-weight: 600;
+}
+
+.vendor-card-actions {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 1.25rem 1rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 0.5rem;
+}
+
+/* ===== Vendor Detail ===== */
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  padding: 0;
+}
+
+.btn-back:hover { text-decoration: underline; }
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.detail-header h2 {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin-right: 0.75rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .vendor-grid { grid-template-columns: 1fr; }
+}
+
+.detail-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.detail-card h3 {
+  font-size: 1rem;
+  color: #334155;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.card-header-row h3 { margin-bottom: 0; }
+
+.btn-sm {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.75rem;
+  background: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-sm:hover { background: #1557b0; }
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.info-item {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.info-item span { color: #64748b; min-width: 100px; }
+.info-item strong { color: #1e293b; }
+
+.linked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.linked-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.linked-item strong {
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+.type-badge {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.type-badge.seasonal { background: #fef3c7; color: #b45309; }
+.type-badge.permanent { background: #dbeafe; color: #1d4ed8; }
+
+.btn-icon.danger { color: #dc2626; }
+.btn-icon.danger:hover { background: #fef2f2; }
+
+.modal-sm { max-width: 400px; }
+
+/* ===== Shared (reuse from UserManagement) ===== */
+.vendor-page .page-header,
+.vendor-detail .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+.vendor-page .page-header h2,
+.vendor-detail h2 { display: flex; align-items: center; gap: 0.5rem; }

@@ -1,0 +1,281 @@
+/* ===== Team Management — reuses shared classes from UserManagement.css ===== */
+
+.team-management .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.team-management .page-header h2 {
+  font-size: 1.25rem;
+  color: #1e293b;
+}
+
+/* ===== Team icon in table ===== */
+.team-icon {
+  vertical-align: middle;
+  margin-right: 0.4rem;
+  font-size: 1.1rem;
+  color: #1a73e8;
+}
+
+/* ===== Member count badge ===== */
+.member-count {
+  display: inline-block;
+  min-width: 1.8rem;
+  text-align: center;
+  padding: 0.15rem 0.5rem;
+  background: #eff6ff;
+  color: #1a73e8;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ===== Member tags in edit modal ===== */
+.member-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.member-tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: #f1f5f9;
+  color: #334155;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ===== Buttons (scoped to avoid conflicts) ===== */
+.team-management .btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 1.2rem;
+  background: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.team-management .btn-primary:hover { background: #1557b0; }
+
+.team-management .btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 4px;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.team-management .btn-icon:hover { background: #e2e8f0; color: #1a73e8; }
+
+.team-management .btn-cancel {
+  padding: 0.6rem 1.2rem;
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.team-management .btn-cancel:hover { background: #e2e8f0; }
+
+/* ===== Filter bar ===== */
+.team-management .filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.team-management .search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0 0.75rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.team-management .search-box input {
+  border: none;
+  outline: none;
+  padding: 0.6rem 0;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+/* ===== Table ===== */
+.team-management .table-wrapper {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.team-management .data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.team-management .data-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.team-management .data-table td {
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.team-management .data-table tr:hover { background: #f8fafc; }
+
+.team-management .td-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.team-management .td-actions { display: flex; gap: 0.35rem; align-items: center; }
+
+.team-management .empty-text { text-align: center; color: #999; padding: 2rem !important; }
+.team-management .loading-text { text-align: center; color: #999; padding: 2rem; }
+
+/* ===== Modal ===== */
+.team-management .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+}
+
+.team-management .modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.team-management .modal-content h3 {
+  font-size: 1.15rem;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+.team-management .modal-content .form-group {
+  margin-bottom: 1rem;
+}
+
+.team-management .modal-content label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.team-management .modal-content input,
+.team-management .modal-content select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.team-management .modal-content input:focus,
+.team-management .modal-content select:focus {
+  border-color: #1a73e8;
+}
+
+/* ===== Status badges ===== */
+.team-management .status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.team-management .status-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.team-management .status-inactive {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ===== Inactive row ===== */
+.team-management .row-inactive {
+  opacity: 0.6;
+}
+
+/* ===== Action button variants ===== */
+.team-management .btn-delete {
+  color: #ef4444;
+}
+
+.team-management .btn-delete:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.team-management .btn-activate {
+  color: #6b7280;
+}
+
+.team-management .btn-activate:hover {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.team-management .btn-deactivate {
+  color: #15803d;
+}
+
+.team-management .btn-deactivate:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.team-management .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}

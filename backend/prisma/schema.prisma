@@ -1,0 +1,358 @@
+// =============================================================
+// DATABASE SCHEMA - Quản Lý Nghiệp Vụ Cung Ứng Lao Động
+// Tech: SQLite (dev) / PostgreSQL (production)
+// =============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================
+// 1. NGƯỜI DÙNG & PHÂN QUYỀN
+// =============================================================
+
+// SQLite không hỗ trợ enum → dùng String, validate ở backend
+// Role: ADMIN | DIRECTOR | TEAM_LEAD | SALE
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  password     String
+  fullName     String   @map("full_name")
+  phone        String?
+  role         String   @default("SALE")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  leadOfTeam   Team?    @relation("TeamLead")
+  teamId       String?  @map("team_id")
+  team         Team?    @relation("TeamMembers", fields: [teamId], references: [id])
+
+  workers      Worker[]
+  collaborators Collaborator[]
+  assignedOrders RecruitmentOrder[] @relation("AssignedSale")
+  createdOrders  RecruitmentOrder[] @relation("CreatedBy")
+  salaries     Salary[]
+  bonuses      SalaryBonus[]
+  auditLogs    AuditLog[]
+  hoursEnteredBy WorkingHours[] @relation("EnteredBy")
+
+  @@map("users")
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  leadId    String   @unique @map("lead_id")
+  lead      User     @relation("TeamLead", fields: [leadId], references: [id])
+  members   User[]   @relation("TeamMembers")
+
+  @@map("teams")
+}
+
+// =============================================================
+// 2. CỘNG TÁC VIÊN (CTV)
+// =============================================================
+
+model Collaborator {
+  id           String   @id @default(uuid())
+  fullName     String   @map("full_name")
+  phone        String
+  idCard       String?  @unique @map("id_card")
+  address      String?
+  bankAccount  String?  @map("bank_account")
+  bankName     String?  @map("bank_name")
+  note         String?
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  saleId       String   @map("sale_id")
+  sale         User     @relation(fields: [saleId], references: [id])
+  workers      Worker[] @relation("ReferredBy")
+
+  @@map("collaborators")
+}
+
+// =============================================================
+// 3. VENDOR & NHÀ MÁY
+// =============================================================
+
+// EmploymentType: SEASONAL | PERMANENT
+
+model Vendor {
+  id            String   @id @default(uuid())
+  name          String
+  contactPerson String   @map("contact_person")
+  phone         String
+  email         String?
+  address       String?
+  note          String?
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  factories     VendorFactory[]
+  recruitmentOrders RecruitmentOrder[]
+
+  @@map("vendors")
+}
+
+model Factory {
+  id        String   @id @default(uuid())
+  name      String
+  address   String?
+  phone     String?
+  note      String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  vendors   VendorFactory[]
+  recruitmentOrders RecruitmentOrder[]
+  workers   Worker[]
+
+  @@map("factories")
+}
+
+model VendorFactory {
+  id             String   @id @default(uuid())
+  vendorId       String   @map("vendor_id")
+  factoryId      String   @map("factory_id")
+  employmentType String   @map("employment_type")
+  note           String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
+  factory   Factory  @relation(fields: [factoryId], references: [id])
+
+  @@unique([vendorId, factoryId, employmentType])
+  @@map("vendor_factories")
+}
+
+// =============================================================
+// 4. ĐƠN TUYỂN DỤNG
+// =============================================================
+
+// OrderStatus: NEW | RECRUITING | FULFILLED | CLOSED
+// Gender: MALE | FEMALE | ANY
+
+model RecruitmentOrder {
+  id                String   @id @default(uuid())
+  title             String
+
+  vendorId          String   @map("vendor_id")
+  vendor            Vendor   @relation(fields: [vendorId], references: [id])
+  factoryId         String   @map("factory_id")
+  factory           Factory  @relation(fields: [factoryId], references: [id])
+
+  employmentType    String   @map("employment_type")
+
+  quantity          Int
+  genderRequirement String   @default("ANY") @map("gender_requirement")
+  ageMin            Int?     @map("age_min")
+  ageMax            Int?     @map("age_max")
+  requirements      String?
+
+  commissionPerHour Decimal  @map("commission_per_hour")
+  specialBonus      Decimal? @map("special_bonus")
+  specialBonusCondition String? @map("special_bonus_condition")
+
+  status            String   @default("NEW")
+
+  createdById       String   @map("created_by_id")
+  createdBy         User     @relation("CreatedBy", fields: [createdById], references: [id])
+  assignedSaleId    String?  @map("assigned_sale_id")
+  assignedSale      User?    @relation("AssignedSale", fields: [assignedSaleId], references: [id])
+
+  deadline          DateTime?
+  note              String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  workerAssignments WorkerAssignment[]
+
+  @@map("recruitment_orders")
+}
+
+// =============================================================
+// 5. CÔNG NHÂN
+// =============================================================
+
+// WorkerStatus: AVAILABLE | WORKING | RESIGNED
+
+model Worker {
+  id             String    @id @default(uuid())
+  fullName       String    @map("full_name")
+  idCard         String    @unique @map("id_card")
+  phone          String?
+  address        String?
+  gender         String    @default("ANY")
+  dateOfBirth    DateTime? @map("date_of_birth")
+  status         String    @default("AVAILABLE")
+
+  employmentType String?   @map("employment_type")
+
+  factoryId      String?   @map("factory_id")
+  factory        Factory?  @relation(fields: [factoryId], references: [id])
+  startDate      DateTime? @map("start_date")
+
+  saleId         String?   @map("sale_id")
+  sale           User?     @relation(fields: [saleId], references: [id])
+
+  collaboratorId String?   @map("collaborator_id")
+  collaborator   Collaborator? @relation("ReferredBy", fields: [collaboratorId], references: [id])
+
+  note           String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  assignments    WorkerAssignment[]
+  workingHours   WorkingHours[]
+
+  @@map("workers")
+}
+
+model WorkerAssignment {
+  id                 String           @id @default(uuid())
+  workerId           String           @map("worker_id")
+  worker             Worker           @relation(fields: [workerId], references: [id])
+  recruitmentOrderId String           @map("recruitment_order_id")
+  recruitmentOrder   RecruitmentOrder @relation(fields: [recruitmentOrderId], references: [id])
+  assignedDate       DateTime         @default(now()) @map("assigned_date")
+  note               String?
+
+  @@unique([workerId, recruitmentOrderId])
+  @@map("worker_assignments")
+}
+
+// =============================================================
+// 6. GIỜ LÀM VIỆC
+// =============================================================
+
+model WorkingHours {
+  id          String   @id @default(uuid())
+  workerId    String   @map("worker_id")
+  worker      Worker   @relation(fields: [workerId], references: [id])
+
+  month       Int
+  year        Int
+  totalHours  Decimal  @map("total_hours")
+
+  enteredById String   @map("entered_by_id")
+  enteredBy   User     @relation("EnteredBy", fields: [enteredById], references: [id])
+  enteredAt   DateTime @default(now()) @map("entered_at")
+
+  note        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([workerId, month, year])
+  @@map("working_hours")
+}
+
+// =============================================================
+// 7. BẢNG LƯƠNG
+// =============================================================
+
+// SalaryStatus: DRAFT | CONFIRMED | PAID
+
+model Salary {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  user            User     @relation(fields: [userId], references: [id])
+
+  month           Int
+  year            Int
+
+  baseSalary      Decimal  @map("base_salary")
+  totalHours      Decimal  @map("total_hours")
+  commissionRate  Decimal  @map("commission_rate")
+  commissionAmount Decimal @map("commission_amount")
+  totalBonus      Decimal  @default(0) @map("total_bonus")
+  totalSalary     Decimal  @map("total_salary")
+
+  status          String   @default("DRAFT")
+  note            String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  bonuses         SalaryBonus[]
+
+  @@unique([userId, month, year])
+  @@map("salaries")
+}
+
+model SalaryBonus {
+  id          String   @id @default(uuid())
+  salaryId    String   @map("salary_id")
+  salary      Salary   @relation(fields: [salaryId], references: [id])
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+
+  description String
+  amount      Decimal
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("salary_bonuses")
+}
+
+// =============================================================
+// 8. CẤU HÌNH HOA HỒNG
+// =============================================================
+
+model CommissionTier {
+  id        String   @id @default(uuid())
+  minHours  Int      @map("min_hours")
+  maxHours  Int      @map("max_hours")     // 999999 = Infinity
+  rate      Decimal  @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("commission_tiers")
+}
+
+model SalaryConfig {
+  id         String   @id @default(uuid())
+  key        String   @unique
+  value      String
+  note       String?
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("salary_configs")
+}
+
+// =============================================================
+// 9. LỊCH SỬ THAO TÁC
+// =============================================================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+
+  action      String
+  entity      String
+  entityId    String   @map("entity_id")
+  oldData     String?  @map("old_data")
+  newData     String?  @map("new_data")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

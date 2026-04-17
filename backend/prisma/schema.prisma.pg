@@ -1,0 +1,423 @@
+// =============================================================
+// DATABASE SCHEMA - Quản Lý Nghiệp Vụ Cung Ứng Lao Động
+// Tech: PostgreSQL + Prisma ORM
+// =============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================
+// 1. NGƯỜI DÙNG & PHÂN QUYỀN
+// =============================================================
+
+enum Role {
+  ADMIN       // Quản trị hệ thống (config, quản lý user)
+  DIRECTOR    // Giám đốc (xem báo cáo, duyệt)
+  TEAM_LEAD   // Trưởng nhóm
+  SALE        // Nhân viên Sale
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  password     String   // bcrypt hash
+  fullName     String   @map("full_name")
+  phone        String?
+  role         Role     @default(SALE)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Trưởng nhóm quản lý nhóm
+  leadOfTeam   Team?    @relation("TeamLead")
+
+  // Sale thuộc nhóm nào
+  teamId       String?  @map("team_id")
+  team         Team?    @relation("TeamMembers", fields: [teamId], references: [id])
+
+  // Sale phụ trách công nhân
+  workers      Worker[]
+
+  // Sale phụ trách CTV
+  collaborators Collaborator[]
+
+  // Sale được giao đơn tuyển
+  assignedOrders RecruitmentOrder[] @relation("AssignedSale")
+
+  // Người tạo đơn tuyển (Trưởng nhóm)
+  createdOrders  RecruitmentOrder[] @relation("CreatedBy")
+
+  // Bảng lương
+  salaries     Salary[]
+
+  // Thưởng khác
+  bonuses      SalaryBonus[]
+
+  // Lịch sử thao tác
+  auditLogs    AuditLog[]
+
+  // Nhập giờ làm
+  hoursEnteredBy WorkingHours[] @relation("EnteredBy")
+
+  @@map("users")
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Trưởng nhóm
+  leadId    String   @unique @map("lead_id")
+  lead      User     @relation("TeamLead", fields: [leadId], references: [id])
+
+  // Thành viên Sale trong nhóm
+  members   User[]   @relation("TeamMembers")
+
+  @@map("teams")
+}
+
+// =============================================================
+// 2. CỘNG TÁC VIÊN (CTV) — Không đăng nhập hệ thống
+// =============================================================
+
+model Collaborator {
+  id           String   @id @default(uuid())
+  fullName     String   @map("full_name")
+  phone        String
+  idCard       String?  @unique @map("id_card") // CCCD (nếu có)
+  address      String?
+  bankAccount  String?  @map("bank_account")
+  bankName     String?  @map("bank_name")
+  note         String?
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Sale quản lý CTV này
+  saleId       String   @map("sale_id")
+  sale         User     @relation(fields: [saleId], references: [id])
+
+  // Công nhân do CTV giới thiệu
+  workers      Worker[] @relation("ReferredBy")
+
+  @@map("collaborators")
+}
+
+// =============================================================
+// 3. VENDOR & NHÀ MÁY
+// =============================================================
+
+enum EmploymentType {
+  SEASONAL    // Thời vụ
+  PERMANENT   // Chính thức
+}
+
+model Vendor {
+  id            String   @id @default(uuid())
+  name          String
+  contactPerson String   @map("contact_person")
+  phone         String
+  email         String?
+  address       String?
+  note          String?
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Vendor hợp tác với nhiều nhà máy
+  factories     VendorFactory[]
+
+  // Đơn tuyển từ Vendor
+  recruitmentOrders RecruitmentOrder[]
+
+  @@map("vendors")
+}
+
+model Factory {
+  id        String   @id @default(uuid())
+  name      String
+  address   String?
+  phone     String?
+  note      String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Nhà máy hợp tác với nhiều Vendor
+  vendors   VendorFactory[]
+
+  // Đơn tuyển cho nhà máy
+  recruitmentOrders RecruitmentOrder[]
+
+  // Công nhân đang làm tại nhà máy
+  workers   Worker[]
+
+  @@map("factories")
+}
+
+// Bảng trung gian: Vendor <-> Nhà máy (many-to-many)
+model VendorFactory {
+  id             String         @id @default(uuid())
+  vendorId       String         @map("vendor_id")
+  factoryId      String         @map("factory_id")
+  employmentType EmploymentType @map("employment_type")
+  // Loại hình hợp tác: Thời vụ / Chính thức
+  note           String?
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
+  factory   Factory  @relation(fields: [factoryId], references: [id])
+
+  @@unique([vendorId, factoryId, employmentType])
+  @@map("vendor_factories")
+}
+
+// =============================================================
+// 4. ĐƠN TUYỂN DỤNG
+// =============================================================
+
+enum OrderStatus {
+  NEW         // Mới
+  RECRUITING  // Đang tuyển
+  FULFILLED   // Đã đủ
+  CLOSED      // Đóng
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  ANY
+}
+
+model RecruitmentOrder {
+  id                String         @id @default(uuid())
+  title             String         // Tiêu đề đơn tuyển
+
+  // Vendor & Nhà máy
+  vendorId          String         @map("vendor_id")
+  vendor            Vendor         @relation(fields: [vendorId], references: [id])
+  factoryId         String         @map("factory_id")
+  factory           Factory        @relation(fields: [factoryId], references: [id])
+
+  // Loại hình tuyển: Thời vụ / Chính thức
+  employmentType    EmploymentType @map("employment_type")
+
+  // Yêu cầu tuyển
+  quantity          Int            // Số lượng CN cần
+  genderRequirement Gender         @default(ANY) @map("gender_requirement")
+  ageMin            Int?           @map("age_min")
+  ageMax            Int?           @map("age_max")
+  requirements      String?        // Yêu cầu khác (text)
+
+  // Hoa hồng & thưởng
+  commissionPerHour Decimal        @map("commission_per_hour") @db.Decimal(12, 2)
+  // Hoa hồng từ Vendor: X đồng / 1 CN / 1 giờ làm
+  specialBonus      Decimal?       @map("special_bonus") @db.Decimal(12, 2)
+  // Thưởng đặc biệt cho công ty (VD: 1.000.000đ/CN sau 7 ngày)
+  specialBonusCondition String?    @map("special_bonus_condition")
+  // Điều kiện nhận thưởng (VD: "làm đủ 7 ngày")
+
+  // Trạng thái & phân công
+  status            OrderStatus    @default(NEW)
+
+  // Trưởng nhóm tạo đơn
+  createdById       String         @map("created_by_id")
+  createdBy         User           @relation("CreatedBy", fields: [createdById], references: [id])
+
+  // Sale được giao phụ trách
+  assignedSaleId    String?        @map("assigned_sale_id")
+  assignedSale      User?          @relation("AssignedSale", fields: [assignedSaleId], references: [id])
+
+  deadline          DateTime?
+  note              String?
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  // Công nhân được cung cấp cho đơn này
+  workerAssignments WorkerAssignment[]
+
+  @@map("recruitment_orders")
+}
+
+// =============================================================
+// 5. CÔNG NHÂN (ỨNG VIÊN)
+// =============================================================
+
+enum WorkerStatus {
+  AVAILABLE   // Đang chờ việc
+  WORKING     // Đang làm tại nhà máy
+  RESIGNED    // Đã nghỉ
+}
+
+model Worker {
+  id             String         @id @default(uuid())
+  fullName       String         @map("full_name")
+  idCard         String         @unique @map("id_card") // Số CCCD
+  phone          String?
+  address        String?
+  gender         Gender         @default(ANY)
+  dateOfBirth    DateTime?      @map("date_of_birth")
+  status         WorkerStatus   @default(AVAILABLE)
+
+  // Loại hình: Thời vụ / Chính thức
+  employmentType EmploymentType? @map("employment_type")
+
+  // Nhà máy đang làm (nếu đang làm)
+  factoryId      String?        @map("factory_id")
+  factory        Factory?       @relation(fields: [factoryId], references: [id])
+  startDate      DateTime?      @map("start_date") // Ngày vào làm
+
+  // Sale phụ trách
+  saleId         String?        @map("sale_id")
+  sale           User?          @relation(fields: [saleId], references: [id])
+
+  // CTV giới thiệu (nếu có)
+  collaboratorId String?        @map("collaborator_id")
+  collaborator   Collaborator?  @relation("ReferredBy", fields: [collaboratorId], references: [id])
+
+  note           String?
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  // Lịch sử phân công vào đơn tuyển
+  assignments    WorkerAssignment[]
+
+  // Giờ làm hàng tháng
+  workingHours   WorkingHours[]
+
+  @@map("workers")
+}
+
+// Bảng trung gian: Công nhân <-> Đơn tuyển
+model WorkerAssignment {
+  id                 String           @id @default(uuid())
+  workerId           String           @map("worker_id")
+  worker             Worker           @relation(fields: [workerId], references: [id])
+  recruitmentOrderId String           @map("recruitment_order_id")
+  recruitmentOrder   RecruitmentOrder @relation(fields: [recruitmentOrderId], references: [id])
+  assignedDate       DateTime         @default(now()) @map("assigned_date")
+  note               String?
+
+  @@unique([workerId, recruitmentOrderId])
+  @@map("worker_assignments")
+}
+
+// =============================================================
+// 6. GIỜ LÀM VIỆC (Vendor gửi cuối tháng)
+// =============================================================
+
+model WorkingHours {
+  id          String   @id @default(uuid())
+  workerId    String   @map("worker_id")
+  worker      Worker   @relation(fields: [workerId], references: [id])
+
+  month       Int      // Tháng (1-12)
+  year        Int      // Năm
+  totalHours  Decimal  @map("total_hours") @db.Decimal(10, 2)
+  // Tổng giờ làm trong tháng của CN này
+
+  // Ai nhập, khi nào
+  enteredById String   @map("entered_by_id")
+  enteredBy   User     @relation("EnteredBy", fields: [enteredById], references: [id])
+  enteredAt   DateTime @default(now()) @map("entered_at")
+
+  note        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([workerId, month, year]) // Mỗi CN chỉ có 1 record/tháng
+  @@map("working_hours")
+}
+
+// =============================================================
+// 7. BẢNG LƯƠNG NHÂN VIÊN SALE
+// =============================================================
+
+enum SalaryStatus {
+  DRAFT       // Nháp
+  CONFIRMED   // Đã xác nhận
+  PAID        // Đã trả
+}
+
+model Salary {
+  id              String       @id @default(uuid())
+  userId          String       @map("user_id") // Sale
+  user            User         @relation(fields: [userId], references: [id])
+
+  month           Int          // Tháng
+  year            Int          // Năm
+
+  baseSalary      Decimal      @map("base_salary") @db.Decimal(12, 2)
+  // Lương cơ bản: 5.000.000đ
+
+  totalHours      Decimal      @map("total_hours") @db.Decimal(10, 2)
+  // Tổng giờ của tất cả CN do Sale phụ trách trong tháng
+
+  commissionRate  Decimal      @map("commission_rate") @db.Decimal(10, 2)
+  // Mức hoa hồng áp dụng (2500, 3500, 4000)
+
+  commissionAmount Decimal     @map("commission_amount") @db.Decimal(12, 2)
+  // Tổng hoa hồng = totalHours × commissionRate
+
+  totalBonus      Decimal      @default(0) @map("total_bonus") @db.Decimal(12, 2)
+  // Tổng thưởng khác
+
+  totalSalary     Decimal      @map("total_salary") @db.Decimal(12, 2)
+  // Tổng lương = baseSalary + commissionAmount + totalBonus
+
+  status          SalaryStatus @default(DRAFT)
+  note            String?
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  // Chi tiết thưởng
+  bonuses         SalaryBonus[]
+
+  @@unique([userId, month, year]) // Mỗi Sale 1 bảng lương/tháng
+  @@map("salaries")
+}
+
+model SalaryBonus {
+  id          String   @id @default(uuid())
+  salaryId    String   @map("salary_id")
+  salary      Salary   @relation(fields: [salaryId], references: [id])
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+
+  description String   // Mô tả thưởng
+  amount      Decimal  @db.Decimal(12, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("salary_bonuses")
+}
+
+// =============================================================
+// 8. LỊCH SỬ THAO TÁC (Audit Log)
+// =============================================================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+
+  action      String   // CREATE, UPDATE, DELETE
+  entity      String   // Tên bảng: worker, working_hours, recruitment_order...
+  entityId    String   @map("entity_id") // ID bản ghi bị thay đổi
+  oldData     Json?    @map("old_data")  // Dữ liệu cũ
+  newData     Json?    @map("new_data")  // Dữ liệu mới
+  description String?  // Mô tả ngắn
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
