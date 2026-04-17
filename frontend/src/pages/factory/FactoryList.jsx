@@ -105,10 +105,10 @@ function FactoryList() {
             <tbody>
               {factories.map((f) => (
                 <tr key={f.id} className={!f.isActive ? 'row-inactive' : ''}>
-                  <td className="td-name">{f.name}</td>
-                  <td>{f.address || '—'}</td>
-                  <td>{f.phone || '—'}</td>
-                  <td>
+                  <td className="td-name" data-label="Nhà máy">{f.name}</td>
+                  <td data-label="Địa chỉ" className="td-hide-mobile">{f.address || '—'}</td>
+                  <td data-label="SĐT">{f.phone || '—'}</td>
+                  <td data-label="Vendor">
                     {f.vendors?.length > 0
                       ? f.vendors.map((vf) => (
                         <span key={vf.id} className={`type-badge ${vf.employmentType.toLowerCase()}`} style={{ marginRight: 4 }}>
@@ -117,14 +117,14 @@ function FactoryList() {
                       ))
                       : '—'}
                   </td>
-                  <td><strong>{f._count?.workers || 0}</strong></td>
-                  <td>{f._count?.recruitmentOrders || 0}</td>
-                  <td>
+                  <td data-label="Số CN"><strong>{f._count?.workers || 0}</strong></td>
+                  <td data-label="Đơn tuyển">{f._count?.recruitmentOrders || 0}</td>
+                  <td data-label="Trạng thái">
                     <span className={`status-dot ${f.isActive ? 'active' : 'inactive'}`}>
                       {f.isActive ? 'Hoạt động' : 'Vô hiệu'}
                     </span>
                   </td>
-                  <td className="td-actions">
+                  <td className="td-actions" data-label="">
                     {canManage && (
                       <>
                         <button className="btn-sm btn-edit" onClick={() => openEdit(f)} title="Sửa"><MdEdit /></button>

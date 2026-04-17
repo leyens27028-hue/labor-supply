@@ -111,20 +111,20 @@ function OrderList() {
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id} className={o.status === 'CLOSED' ? 'row-inactive' : ''}>
-                  <td className="td-name">{o.title}</td>
-                  <td>{o.vendor.name}</td>
-                  <td>{o.factory.name}</td>
-                  <td><span className={`type-badge ${o.employmentType.toLowerCase()}`}>{TYPE_MAP[o.employmentType]}</span></td>
-                  <td>{o.quantity}</td>
-                  <td><strong>{o._count.workerAssignments}</strong>/{o.quantity}</td>
-                  <td className="td-money">{Number(o.commissionPerHour).toLocaleString('vi-VN')}đ</td>
-                  <td>{o.assignedSale?.fullName || '—'}</td>
-                  <td>
+                  <td className="td-name" data-label="Tiêu đề">{o.title}</td>
+                  <td data-label="Vendor">{o.vendor.name}</td>
+                  <td data-label="Nhà máy">{o.factory.name}</td>
+                  <td data-label="Loại hình"><span className={`type-badge ${o.employmentType.toLowerCase()}`}>{TYPE_MAP[o.employmentType]}</span></td>
+                  <td data-label="SL cần">{o.quantity}</td>
+                  <td data-label="Đã có"><strong>{o._count.workerAssignments}</strong>/{o.quantity}</td>
+                  <td className="td-money" data-label="Hoa hồng/giờ">{Number(o.commissionPerHour).toLocaleString('vi-VN')}đ</td>
+                  <td data-label="Sale" className="td-hide-mobile">{o.assignedSale?.fullName || '—'}</td>
+                  <td data-label="Trạng thái">
                     <span className="status-badge" style={{ background: STATUS_MAP[o.status]?.color }}>
                       {STATUS_MAP[o.status]?.label}
                     </span>
                   </td>
-                  <td className="td-actions">
+                  <td className="td-actions" data-label="">
                     <button className="btn-sm btn-view" onClick={() => navigate(`/orders/${o.id}`)} title="Xem"><MdVisibility /></button>
                     {canManage && (
                       <>

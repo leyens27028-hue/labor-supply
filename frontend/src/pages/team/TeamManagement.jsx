@@ -165,21 +165,21 @@ function TeamManagement() {
             <tbody>
               {filteredTeams.map((t) => (
                 <tr key={t.id} className={t.isActive === false ? 'row-inactive' : ''}>
-                  <td className="td-name">
+                  <td className="td-name" data-label="Tên nhóm">
                     <MdGroup className="team-icon" />
                     {t.name}
                   </td>
-                  <td>{t.lead?.fullName || '—'}</td>
-                  <td>
+                  <td data-label="Trưởng nhóm">{t.lead?.fullName || '—'}</td>
+                  <td data-label="Thành viên">
                     <span className="member-count">{t._count?.members ?? t.members?.length ?? 0}</span>
                   </td>
-                  <td>
+                  <td data-label="Trạng thái">
                     <span className={`status-badge ${t.isActive === false ? 'status-inactive' : 'status-active'}`}>
                       {t.isActive === false ? 'Vô hiệu' : 'Hoạt động'}
                     </span>
                   </td>
-                  <td>{formatDate(t.createdAt)}</td>
-                  <td className="td-actions">
+                  <td data-label="Ngày tạo" className="td-hide-mobile">{formatDate(t.createdAt)}</td>
+                  <td className="td-actions" data-label="">
                     <button className="btn-icon" title="Sửa" onClick={() => openEdit(t)}>
                       <MdEdit />
                     </button>

@@ -147,21 +147,21 @@ function UserManagement() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className={!u.isActive ? 'inactive-row' : ''}>
-                  <td className="td-name">{u.fullName}</td>
-                  <td>{u.email}</td>
-                  <td>{u.phone || '—'}</td>
-                  <td>
+                  <td className="td-name" data-label="Họ tên">{u.fullName}</td>
+                  <td data-label="Email">{u.email}</td>
+                  <td data-label="SĐT">{u.phone || '—'}</td>
+                  <td data-label="Vai trò">
                     <span className="role-badge" style={{ background: ROLE_COLORS[u.role] }}>
                       {ROLE_LABELS[u.role]}
                     </span>
                   </td>
-                  <td>{u.team?.name || '—'}</td>
-                  <td>
+                  <td data-label="Nhóm">{u.team?.name || '—'}</td>
+                  <td data-label="Trạng thái">
                     <span className={`status-dot ${u.isActive ? 'active' : 'inactive'}`}>
                       {u.isActive ? 'Hoạt động' : 'Vô hiệu'}
                     </span>
                   </td>
-                  <td className="td-actions">
+                  <td className="td-actions" data-label="">
                     <button className="btn-icon" title="Sửa" onClick={() => openEdit(u)}>
                       <MdEdit />
                     </button>
@@ -230,21 +230,27 @@ function UserManagement() {
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
               </div>
-              <div className="form-row">
+              <div className="form-group">
+                <label>Vai trò *</label>
+                <select
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value, teamId: ['DIRECTOR', 'ADMIN'].includes(e.target.value) ? '' : form.teamId })}
+                >
+                  <option value="SALE">Nhân viên Sale — Tìm & cung cấp công nhân</option>
+                  <option value="TEAM_LEAD">Trưởng nhóm — Quản lý đơn tuyển, giao việc</option>
+                  <option value="DIRECTOR">Giám đốc — Xem báo cáo, duyệt lương</option>
+                  <option value="ADMIN">Quản trị viên — Toàn quyền hệ thống</option>
+                </select>
+                <small className="form-hint role-hint">
+                  {form.role === 'SALE' && 'Nhận đơn tuyển, cập nhật công nhân, xem lương dự kiến'}
+                  {form.role === 'TEAM_LEAD' && 'Tạo đơn tuyển, giao việc cho Sale trong nhóm'}
+                  {form.role === 'DIRECTOR' && 'Xem toàn bộ báo cáo, duyệt lương, xuất file'}
+                  {form.role === 'ADMIN' && 'Quản trị hệ thống, cấu hình, phân quyền user'}
+                </small>
+              </div>
+              {['SALE', 'TEAM_LEAD'].includes(form.role) && (
                 <div className="form-group">
-                  <label>Vai trò *</label>
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
-                  >
-                    <option value="SALE">Nhân viên Sale</option>
-                    <option value="TEAM_LEAD">Trưởng nhóm</option>
-                    <option value="DIRECTOR">Giám đốc</option>
-                    <option value="ADMIN">Quản trị viên</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Nhóm</label>
+                  <label>Nhóm {form.role === 'SALE' ? '(nên gán vào nhóm)' : ''}</label>
                   <select
                     value={form.teamId}
                     onChange={(e) => setForm({ ...form, teamId: e.target.value })}
@@ -255,7 +261,7 @@ function UserManagement() {
                     ))}
                   </select>
                 </div>
-              </div>
+              )}
               <div className="modal-actions">
                 <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
                   Hủy

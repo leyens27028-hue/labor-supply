@@ -154,15 +154,15 @@ function WorkerList() {
             <tbody>
               {workers.map((w) => (
                 <tr key={w.id} className={w.status === 'RESIGNED' ? 'row-inactive' : ''}>
-                  <td className="td-name">{w.fullName}</td>
-                  <td>{w.idCard}</td>
-                  <td>{w.phone || '—'}</td>
-                  <td>{w.employmentType ? <span className={`type-badge ${w.employmentType.toLowerCase()}`}>{TYPE_MAP[w.employmentType]}</span> : '—'}</td>
-                  <td>{w.factory?.name || '—'}</td>
-                  <td>{w.sale?.fullName || '—'}</td>
-                  <td>{w.collaborator?.fullName || '—'}</td>
-                  <td><span className="status-badge" style={{ background: STATUS_MAP[w.status]?.color }}>{STATUS_MAP[w.status]?.label}</span></td>
-                  <td className="td-actions">
+                  <td className="td-name" data-label="Họ tên">{w.fullName}</td>
+                  <td data-label="CCCD" className="td-hide-mobile">{w.idCard}</td>
+                  <td data-label="SĐT">{w.phone || '—'}</td>
+                  <td data-label="Loại hình">{w.employmentType ? <span className={`type-badge ${w.employmentType.toLowerCase()}`}>{TYPE_MAP[w.employmentType]}</span> : '—'}</td>
+                  <td data-label="Nhà máy">{w.factory?.name || '—'}</td>
+                  <td data-label="Sale" className="td-hide-mobile">{w.sale?.fullName || '—'}</td>
+                  <td data-label="CTV" className="td-hide-mobile">{w.collaborator?.fullName || '—'}</td>
+                  <td data-label="Trạng thái"><span className="status-badge" style={{ background: STATUS_MAP[w.status]?.color }}>{STATUS_MAP[w.status]?.label}</span></td>
+                  <td className="td-actions" data-label="">
                     <button className="btn-sm btn-view" onClick={() => navigate(`/workers/${w.id}`)} title="Xem"><MdVisibility /></button>
                     {canCreate && <button className="btn-sm btn-edit" onClick={() => openEdit(w)} title="Sửa"><MdEdit /></button>}
                     {canManage && (

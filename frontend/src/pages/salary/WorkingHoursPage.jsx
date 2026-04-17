@@ -109,14 +109,14 @@ function WorkingHoursPage() {
             <tbody>
               {records.map((r) => (
                 <tr key={r.id}>
-                  <td className="td-name">{r.worker.fullName}</td>
-                  <td>{r.worker.idCard}</td>
-                  <td>{r.worker.factory?.name || '—'}</td>
-                  <td>{r.worker.sale?.fullName || '—'}</td>
-                  <td className="td-money">{Number(r.totalHours).toLocaleString('vi-VN')}h</td>
-                  <td>{r.enteredBy.fullName}</td>
-                  <td>{new Date(r.enteredAt).toLocaleString('vi-VN')}</td>
-                  <td className="td-actions">
+                  <td className="td-name" data-label="Công nhân">{r.worker.fullName}</td>
+                  <td data-label="CCCD" className="td-hide-mobile">{r.worker.idCard}</td>
+                  <td data-label="Nhà máy">{r.worker.factory?.name || '—'}</td>
+                  <td data-label="Sale" className="td-hide-mobile">{r.worker.sale?.fullName || '—'}</td>
+                  <td className="td-money" data-label="Tổng giờ">{Number(r.totalHours).toLocaleString('vi-VN')}h</td>
+                  <td data-label="Người nhập" className="td-hide-mobile">{r.enteredBy.fullName}</td>
+                  <td data-label="Thời gian" className="td-hide-mobile">{new Date(r.enteredAt).toLocaleString('vi-VN')}</td>
+                  <td className="td-actions" data-label="">
                     <button className="btn-sm btn-edit" onClick={() => openEdit(r)} title="Sửa"><MdEdit /></button>
                     {canManage && <button className="btn-sm btn-delete" onClick={() => handleDelete(r)} title="X��a"><MdDelete /></button>}
                   </td>

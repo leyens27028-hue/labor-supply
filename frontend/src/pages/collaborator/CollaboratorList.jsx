@@ -119,15 +119,15 @@ function CollaboratorList() {
             <tbody>
               {collaborators.map((c) => (
                 <tr key={c.id} className={!c.isActive ? 'row-inactive' : ''}>
-                  <td className="td-name">{c.fullName}</td>
-                  <td>{c.phone}</td>
-                  <td>{c.idCard || '—'}</td>
-                  <td>{c.bankName || '—'}</td>
-                  <td>{c.bankAccount || '—'}</td>
-                  <td>{c.sale?.fullName || '—'}</td>
-                  <td><strong>{c._count?.workers || 0}</strong></td>
-                  <td><span className={`status-dot ${c.isActive ? 'active' : 'inactive'}`}>{c.isActive ? 'Hoạt động' : 'Vô hiệu'}</span></td>
-                  <td className="td-actions">
+                  <td className="td-name" data-label="Họ tên">{c.fullName}</td>
+                  <td data-label="SĐT">{c.phone}</td>
+                  <td data-label="CCCD" className="td-hide-mobile">{c.idCard || '—'}</td>
+                  <td data-label="Ngân hàng" className="td-hide-mobile">{c.bankName || '—'}</td>
+                  <td data-label="STK" className="td-hide-mobile">{c.bankAccount || '—'}</td>
+                  <td data-label="Sale">{c.sale?.fullName || '—'}</td>
+                  <td data-label="CN đã GT"><strong>{c._count?.workers || 0}</strong></td>
+                  <td data-label="Trạng thái"><span className={`status-dot ${c.isActive ? 'active' : 'inactive'}`}>{c.isActive ? 'Hoạt động' : 'Vô hiệu'}</span></td>
+                  <td className="td-actions" data-label="">
                     {canCreate && <button className="btn-sm btn-edit" onClick={() => openEdit(c)} title="Sửa"><MdEdit /></button>}
                     {canManage && (
                       <>

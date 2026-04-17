@@ -1,0 +1,154 @@
+/* ===== Mobile Card Layout for Data Tables ===== */
+/* Converts .data-table to card-based layout on small screens */
+
+@media (max-width: 768px) {
+  /* Hide table header on mobile */
+  .data-table thead {
+    display: none;
+  }
+
+  .data-table,
+  .data-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  /* Each row becomes a card */
+  .data-table tbody tr {
+    display: block;
+    background: white;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    position: relative;
+  }
+
+  .data-table tbody tr:hover {
+    background: white;
+    border-color: #1a73e8;
+  }
+
+  .data-table tbody tr.inactive-row,
+  .data-table tbody tr.row-inactive {
+    opacity: 0.55;
+  }
+
+  /* Each cell becomes a row in the card */
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 0 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    font-size: 0.85rem !important;
+    gap: 0.5rem;
+  }
+
+  .data-table td:last-child {
+    border-bottom: none !important;
+  }
+
+  /* Label from data-label attribute */
+  .data-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: #64748b;
+    flex-shrink: 0;
+    min-width: 90px;
+  }
+
+  /* Right-align values */
+  .data-table td > * {
+    text-align: right;
+  }
+
+  /* First cell (usually name) is prominent */
+  .data-table td.td-name {
+    font-size: 0.95rem !important;
+    font-weight: 700;
+    color: #1e293b;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+  }
+
+  /* Actions row */
+  .data-table td.td-actions {
+    justify-content: flex-end;
+    padding-top: 0.5rem !important;
+    border-bottom: none !important;
+    flex-wrap: wrap;
+  }
+
+  .data-table td.td-actions::before {
+    display: none;
+  }
+
+  /* Empty text spans full width */
+  .data-table td[colspan] {
+    display: block;
+    text-align: center;
+  }
+
+  .data-table td[colspan]::before {
+    display: none;
+  }
+
+  /* Table wrapper removes shadow since cards have their own */
+  .table-wrapper {
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow-x: visible !important;
+  }
+
+  /* Action buttons in cards */
+  .td-actions .btn-icon {
+    font-size: 1.3rem;
+    padding: 0.4rem;
+  }
+
+  .td-actions .btn-toggle {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  /* Money cells */
+  .td-money {
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  /* Status/role badges in cards */
+  .role-badge,
+  .status-badge,
+  .type-badge {
+    font-size: 0.72rem !important;
+  }
+
+  /* Hide less important cells on very small screens */
+  .data-table td.td-hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .data-table tbody tr {
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .data-table td {
+    font-size: 0.8rem !important;
+  }
+
+  .data-table td::before {
+    font-size: 0.72rem;
+    min-width: 75px;
+  }
+
+  .data-table td.td-name {
+    font-size: 0.88rem !important;
+  }
+}

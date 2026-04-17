@@ -273,15 +273,15 @@ function SalaryList() {
                 <tbody>
                   {salaries.map((s) => (
                     <tr key={s.id}>
-                      <td className="td-name">{s.user.fullName}</td>
-                      <td>{fmt(s.totalHours)}h</td>
-                      <td className="td-money">{fmt(s.commissionRate)}đ</td>
-                      <td>{fmt(s.baseSalary)}đ</td>
-                      <td className="td-money">{fmt(s.commissionAmount)}đ</td>
-                      <td>{fmt(s.totalBonus)}đ</td>
-                      <td><strong className="td-money">{fmt(s.totalSalary)}đ</strong></td>
-                      <td><span className="status-badge" style={{ background: STATUS_MAP[s.status]?.color }}>{STATUS_MAP[s.status]?.label}</span></td>
-                      <td className="td-actions">
+                      <td className="td-name" data-label="Nhân viên">{s.user.fullName}</td>
+                      <td data-label="Tổng giờ">{fmt(s.totalHours)}h</td>
+                      <td className="td-money td-hide-mobile" data-label="HH/giờ">{fmt(s.commissionRate)}đ</td>
+                      <td data-label="Lương CB" className="td-hide-mobile">{fmt(s.baseSalary)}đ</td>
+                      <td className="td-money" data-label="Hoa hồng">{fmt(s.commissionAmount)}đ</td>
+                      <td data-label="Thưởng" className="td-hide-mobile">{fmt(s.totalBonus)}đ</td>
+                      <td data-label="Tổng lương"><strong className="td-money">{fmt(s.totalSalary)}đ</strong></td>
+                      <td data-label="Trạng thái"><span className="status-badge" style={{ background: STATUS_MAP[s.status]?.color }}>{STATUS_MAP[s.status]?.label}</span></td>
+                      <td className="td-actions" data-label="">
                         <button className="btn-sm btn-edit" title="Thêm thưởng" onClick={() => { setSelectedSalary(s); setBonusForm({ description: '', amount: '' }); setShowBonusModal(true); }}>
                           <MdAdd />
                         </button>
@@ -391,17 +391,17 @@ function SalaryList() {
                     <tbody>
                       {tiers.map((tier, idx) => (
                         <tr key={tier.id} className={!tier.isActive ? 'row-inactive' : ''}>
-                          <td>{idx + 1}</td>
-                          <td>{fmt(tier.minHours)}</td>
-                          <td>{fmtHours(tier.maxHours)}</td>
-                          <td className="td-money">{fmt(tier.rate)}đ</td>
-                          <td>
+                          <td data-label="STT" className="td-hide-mobile">{idx + 1}</td>
+                          <td data-label="Từ (giờ)">{fmt(tier.minHours)}</td>
+                          <td data-label="Đến (giờ)">{fmtHours(tier.maxHours)}</td>
+                          <td className="td-money" data-label="Hoa hồng">{fmt(tier.rate)}đ</td>
+                          <td data-label="Trạng thái">
                             <span className={`status-badge ${tier.isActive ? 'active' : 'inactive'}`}>
                               {tier.isActive ? 'Đang bật' : 'Đã tắt'}
                             </span>
                           </td>
-                          <td>{tier.note || '—'}</td>
-                          <td className="td-actions">
+                          <td data-label="Ghi chú" className="td-hide-mobile">{tier.note || '—'}</td>
+                          <td className="td-actions" data-label="">
                             <button className="btn-sm btn-edit" title="Sửa" onClick={() => openEditTierModal(tier)}>
                               <MdEdit />
                             </button>
